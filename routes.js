@@ -1,5 +1,6 @@
 const fs = require('fs')
 const express = require('express')
+const { BlobServiceClient } = require("@azure/storage-blob");
 const router = express.Router()
 
 router.get('/api', function(req, res, next) {
@@ -23,6 +24,19 @@ router.get('/api', function(req, res, next) {
   } else {
     return res.end('unknown action!')
   }
+})
+
+router.get('/storage', async function(req, res, next) {
+  const account = "cedtest"
+  const sas = process.env.SAS
+  const blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net${sas}`)
+  let i = 1
+  let containers = blobServiceClient.listContainers()
+  data = []
+  for await (const container of containers) {
+    data.push(container.name)
+  }
+  return res.end(data.join(','))
 })
 
 router.get('/', function(req, res, next) {
