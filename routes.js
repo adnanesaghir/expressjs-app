@@ -27,8 +27,17 @@ router.get('/api', function(req, res, next) {
 })
 
 router.get('/storage', async function(req, res, next) {
-  const account = "cedtest"
-  const sas = process.env.SAS
+  const country = req.query.country
+  let account, sas
+  if (country === 'europe') {
+    account = "cedtest"
+    sas = process.env.EU_SAS
+  } else if (country === 'asia') {
+    account = "cedasia"
+    sas = process.env.ASIA_SAS
+  } else {
+    return res.end('unknown country!')
+  }
   const blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net${sas}`)
   let i = 1
   let containers = blobServiceClient.listContainers()
@@ -36,7 +45,7 @@ router.get('/storage', async function(req, res, next) {
   for await (const container of containers) {
     data.push(container.name)
   }
-  return res.end(data.join(','))
+  return res.end(data.join(', '))
 })
 
 router.get('/', function(req, res, next) {
